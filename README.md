@@ -1,3 +1,3 @@
 # Kewl GUI - Roblox ESP and silent aim
 
-This shit sucks lol
+I'm still trying to fix this.
