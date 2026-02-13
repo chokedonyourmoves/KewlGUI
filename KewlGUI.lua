@@ -1,9 +1,4 @@
-diff --git a/KewlGUI.lua b/KewlGUI.lua
-index ecc70590b5f180a8e19726662cedd844d27b8857..25330c987c2f3a58d768a2346c8944f3e99d0f05 100644
---- a/KewlGUI.lua
-+++ b/KewlGUI.lua
-@@ -1,31 +1,30 @@
- local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
  
  -- Services
  local Players = game:GetService("Players")
