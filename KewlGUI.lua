@@ -1,4 +1,4 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/gen2"))()
 
 -- Services
 local Players = game:GetService("Players")
@@ -36,8 +36,8 @@ local Settings = {
     PredictionAmount = 1,
     HitboxSize = 0,
     VisibleCheck = true,
-    Tracking = true,   -- NEW: master sub-switch for aim tracking
-    AimSmooth = 0,     -- NEW: 0 = instant snap, 1 = very smooth
+    Tracking = true,
+    AimSmooth = 0,
 }
 
 -- FOV circles (Drawing API)
@@ -58,12 +58,12 @@ local function CreateEsp(player)
     if EspObjects[player] then return end
 
     local esp = {
-        Box      = Drawing.new("Square"),
-        BoxFill  = Drawing.new("Square"),
-        Tracer   = Drawing.new("Line"),
+        Box       = Drawing.new("Square"),
+        BoxFill   = Drawing.new("Square"),
+        Tracer    = Drawing.new("Line"),
         HealthBar = Drawing.new("Line"),
-        Name     = Drawing.new("Text"),
-        Distance = Drawing.new("Text"),
+        Name      = Drawing.new("Text"),
+        Distance  = Drawing.new("Text"),
     }
 
     esp.Box.Thickness = 1
@@ -242,7 +242,7 @@ local function ToggleESP(en)
     end
 end
 
--- Predicted aim point (with ms -> s fix)
+-- Predicted aim point
 local function GetPredictedPos(targetPlayer)
     local char = targetPlayer.Character
     if not char then return nil end
@@ -303,7 +303,6 @@ mt.__namecall = newcclosure(function(self, ...)
             local finalDir = desiredDir
 
             if Settings.AimSmooth > 0 then
-                -- Lerp toward the target; higher smooth = slower turn
                 local alpha = math.clamp(1 - Settings.AimSmooth, 0.01, 1)
                 finalDir = direction.Unit:Lerp(desiredDir, alpha).Unit
             end
@@ -329,50 +328,191 @@ local function DestroyAll()
     for _, conn in ipairs(Connections) do conn:Disconnect() end
 end
 
--- UI
+-- UI (Rayfield Gen 2)
 local Window = Rayfield:CreateWindow({
-    Name = "🦎 Kewl GUI | ESP + Silent Aim",
-    LoadingTitle = "Loading v2.3...",
-    LoadingSubtitle = "ESP & Aimbot Suite",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "KewlGUI",
-        FileName = "KewlConfig",
+    name = "🦎 Kewl GUI | ESP + Silent Aim",
+    subtitle = "Rayfield Gen2",
+    sidebarLayout = true,
+    configuration = {
+        autoSave = true,
+        autoLoad = true,
+        fileName = "KewlConfig",
+        customFolder = "KewlGUI",
     },
-    ToggleUIKeybind = "RightControl",
 })
 
 -- ESP tab
-local ESPTab = Window:CreateTab("ESP", "eye")
-ESPTab:CreateToggle({ Name = "Enable ESP", CurrentValue = false, Flag = "ESP_Main", Callback = ToggleESP })
-ESPTab:CreateToggle({ Name = "FOV Circle", CurrentValue = Settings.ShowFOV, Flag = "ESP_FOV", Callback = function(v) Settings.ShowFOV = v; FOVCircle.Visible = v end })
-ESPTab:CreateToggle({ Name = "Boxes", CurrentValue = Settings.ShowBox, Flag = "ESP_Box", Callback = function(v) Settings.ShowBox = v end })
-ESPTab:CreateToggle({ Name = "Health", CurrentValue = Settings.ShowHealth, Flag = "ESP_Health", Callback = function(v) Settings.ShowHealth = v end })
-ESPTab:CreateToggle({ Name = "Names", CurrentValue = Settings.ShowNames, Flag = "ESP_Names", Callback = function(v) Settings.ShowNames = v end })
-ESPTab:CreateToggle({ Name = "Distance", CurrentValue = Settings.ShowDistance, Flag = "ESP_Dist", Callback = function(v) Settings.ShowDistance = v end })
-ESPTab:CreateToggle({ Name = "Tracers", CurrentValue = Settings.ShowTracers, Flag = "ESP_Tracers", Callback = function(v) Settings.ShowTracers = v end })
-ESPTab:CreateToggle({ Name = "Team Check", CurrentValue = Settings.TeamCheck, Flag = "ESP_Team", Callback = function(v) Settings.TeamCheck = v end })
-ESPTab:CreateSlider({ Name = "Max Distance", Range = { 100, 5000 }, Increment = 50, CurrentValue = Settings.MaxDistance, Flag = "ESP_MaxDist", Callback = function(v) Settings.MaxDistance = v end })
-ESPTab:CreateSlider({ Name = "FOV Size", Range = { 50, 600 }, Increment = 5, CurrentValue = Settings.FOVSize, Flag = "ESP_FOVSize", Callback = function(v) Settings.FOVSize = v end })
-ESPTab:CreateSlider({ Name = "Text Size", Range = { 8, 24 }, Increment = 1, CurrentValue = Settings.TextSize, Flag = "ESP_TextSize", Callback = function(v) Settings.TextSize = v end })
+local ESPTab = Window:CreateTab({ name = "ESP", icon = "eye" })
+
+ESPTab:CreateToggle({
+    name = "Enable ESP",
+    value = false,
+    flag = "ESP_Main",
+    callback = ToggleESP,
+})
+
+ESPTab:CreateToggle({
+    name = "FOV Circle",
+    value = Settings.ShowFOV,
+    flag = "ESP_FOV",
+    callback = function(v)
+        Settings.ShowFOV = v
+        FOVCircle.Visible = v
+    end,
+})
+
+ESPTab:CreateToggle({
+    name = "Boxes",
+    value = Settings.ShowBox,
+    flag = "ESP_Box",
+    callback = function(v) Settings.ShowBox = v end,
+})
+
+ESPTab:CreateToggle({
+    name = "Health",
+    value = Settings.ShowHealth,
+    flag = "ESP_Health",
+    callback = function(v) Settings.ShowHealth = v end,
+})
+
+ESPTab:CreateToggle({
+    name = "Names",
+    value = Settings.ShowNames,
+    flag = "ESP_Names",
+    callback = function(v) Settings.ShowNames = v end,
+})
+
+ESPTab:CreateToggle({
+    name = "Distance",
+    value = Settings.ShowDistance,
+    flag = "ESP_Dist",
+    callback = function(v) Settings.ShowDistance = v end,
+})
+
+ESPTab:CreateToggle({
+    name = "Tracers",
+    value = Settings.ShowTracers,
+    flag = "ESP_Tracers",
+    callback = function(v) Settings.ShowTracers = v end,
+})
+
+ESPTab:CreateToggle({
+    name = "Team Check",
+    value = Settings.TeamCheck,
+    flag = "ESP_Team",
+    callback = function(v) Settings.TeamCheck = v end,
+})
+
+ESPTab:CreateSlider({
+    name = "Max Distance",
+    range = { 100, 5000 },
+    increment = 50,
+    value = Settings.MaxDistance,
+    flag = "ESP_MaxDist",
+    callback = function(v) Settings.MaxDistance = v end,
+})
+
+ESPTab:CreateSlider({
+    name = "FOV Size",
+    range = { 50, 600 },
+    increment = 5,
+    value = Settings.FOVSize,
+    flag = "ESP_FOVSize",
+    callback = function(v) Settings.FOVSize = v end,
+})
+
+ESPTab:CreateSlider({
+    name = "Text Size",
+    range = { 8, 24 },
+    increment = 1,
+    value = Settings.TextSize,
+    flag = "ESP_TextSize",
+    callback = function(v) Settings.TextSize = v end,
+})
 
 -- Aimbot tab
-local AimTab = Window:CreateTab("Aimbot", "crosshair")
-AimTab:CreateToggle({ Name = "Enable Silent Aim", CurrentValue = Settings.AimEnabled, Flag = "Aim_Main", Callback = function(v) Settings.AimEnabled = v end })
-AimTab:CreateToggle({ Name = "Tracking", CurrentValue = Settings.Tracking, Flag = "Aim_Tracking", Callback = function(v) Settings.Tracking = v end })
-AimTab:CreateSlider({ Name = "Smoothing", Range = { 0, 1 }, Increment = 0.01, CurrentValue = Settings.AimSmooth, Flag = "Aim_Smooth", Callback = function(v) Settings.AimSmooth = v end })
-AimTab:CreateSlider({ Name = "FOV Size", Range = { 10, 600 }, Increment = 5, CurrentValue = Settings.AimFOVSize, Flag = "Aim_FOV", Callback = function(v) Settings.AimFOVSize = v end })
-AimTab:CreateSlider({ Name = "Max Distance", Range = { 100, 3000 }, Increment = 50, CurrentValue = Settings.AimMaxDistance, Flag = "Aim_Dist", Callback = function(v) Settings.AimMaxDistance = v end })
-AimTab:CreateToggle({ Name = "Visible Check", CurrentValue = Settings.VisibleCheck, Flag = "Aim_Visible", Callback = function(v) Settings.VisibleCheck = v end })
-AimTab:CreateToggle({ Name = "Prediction", CurrentValue = Settings.Predict, Flag = "Aim_Predict", Callback = function(v) Settings.Predict = v end })
-AimTab:CreateSlider({ Name = "Prediction Amount", Range = { 0, 5 }, Increment = 0.1, CurrentValue = Settings.PredictionAmount, Flag = "Aim_PredAmt", Callback = function(v) Settings.PredictionAmount = v end })
-AimTab:CreateSlider({ Name = "Hitbox Size", Range = { 0, 5 }, Increment = 0.1, CurrentValue = Settings.HitboxSize, Flag = "Aim_Hitbox", Callback = function(v) Settings.HitboxSize = v end })
+local AimTab = Window:CreateTab({ name = "Aimbot", icon = "crosshair" })
+
+AimTab:CreateToggle({
+    name = "Enable Silent Aim",
+    value = Settings.AimEnabled,
+    flag = "Aim_Main",
+    callback = function(v) Settings.AimEnabled = v end,
+})
+
+AimTab:CreateToggle({
+    name = "Tracking",
+    value = Settings.Tracking,
+    flag = "Aim_Tracking",
+    callback = function(v) Settings.Tracking = v end,
+})
+
+AimTab:CreateSlider({
+    name = "Smoothing",
+    range = { 0, 1 },
+    increment = 0.01,
+    value = Settings.AimSmooth,
+    flag = "Aim_Smooth",
+    callback = function(v) Settings.AimSmooth = v end,
+})
+
+AimTab:CreateSlider({
+    name = "FOV Size",
+    range = { 10, 600 },
+    increment = 5,
+    value = Settings.AimFOVSize,
+    flag = "Aim_FOV",
+    callback = function(v) Settings.AimFOVSize = v end,
+})
+
+AimTab:CreateSlider({
+    name = "Max Distance",
+    range = { 100, 3000 },
+    increment = 50,
+    value = Settings.AimMaxDistance,
+    flag = "Aim_Dist",
+    callback = function(v) Settings.AimMaxDistance = v end,
+})
+
+AimTab:CreateToggle({
+    name = "Visible Check",
+    value = Settings.VisibleCheck,
+    flag = "Aim_Visible",
+    callback = function(v) Settings.VisibleCheck = v end,
+})
+
+AimTab:CreateToggle({
+    name = "Prediction",
+    value = Settings.Predict,
+    flag = "Aim_Predict",
+    callback = function(v) Settings.Predict = v end,
+})
+
+AimTab:CreateSlider({
+    name = "Prediction Amount",
+    range = { 0, 5 },
+    increment = 0.1,
+    value = Settings.PredictionAmount,
+    flag = "Aim_PredAmt",
+    callback = function(v) Settings.PredictionAmount = v end,
+})
+
+AimTab:CreateSlider({
+    name = "Hitbox Size",
+    range = { 0, 5 },
+    increment = 0.1,
+    value = Settings.HitboxSize,
+    flag = "Aim_Hitbox",
+    callback = function(v) Settings.HitboxSize = v end,
+})
+
 AimTab:CreateDropdown({
-    Name = "Target Part",
-    Options = { "Head", "HumanoidRootPart", "UpperTorso", "LowerTorso", "Random" },
-    CurrentOption = { Settings.TargetPart },
-    Flag = "Aim_Part",
-    Callback = function(v) Settings.TargetPart = v[1] end,
+    name = "Target Part",
+    options = { "Head", "HumanoidRootPart", "UpperTorso", "LowerTorso", "Random" },
+    multiSelect = false,
+    value = Settings.TargetPart,
+    flag = "Aim_Part",
+    callback = function(v) Settings.TargetPart = v end,
 })
 
 -- Player connections + main loop
